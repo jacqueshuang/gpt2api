@@ -1,0 +1,47 @@
+# =====================================================
+# KleinAI · GHCR all-in-one 单镜像部署
+# 启动：docker compose --env-file ./env/.env.all-in-one -f docker-compose.all-in-one.yml up -d
+# 依赖：外部 MySQL / Redis
+# =====================================================
+
+services:
+  gpt2api:
+    image: ${GPT2API_IMAGE:-ghcr.io/432539/gpt2api:latest}
+    container_name: ${GPT2API_CONTAINER_NAME:-gpt2api}
+    restart: unless-stopped
+    environment:
+      KLEIN_ENV: ${KLEIN_ENV:-prod}
+      KLEIN_DB_DSN: ${KLEIN_DB_DSN:?KLEIN_DB_DSN is required}
+      KLEIN_REDIS_ADDR: ${KLEIN_REDIS_ADDR:?KLEIN_REDIS_ADDR is required}
+      KLEIN_REDIS_PASSWORD: ${KLEIN_REDIS_PASSWORD:-}
+      KLEIN_JWT_SECRET: ${KLEIN_JWT_SECRET:?KLEIN_JWT_SECRET is required}
+      KLEIN_JWT_REFRESH_SECRET: ${KLEIN_JWT_REFRESH_SECRET:?KLEIN_JWT_REFRESH_SECRET is required}
+      KLEIN_AES_KEY: ${KLEIN_AES_KEY:?KLEIN_AES_KEY is required}
+      KLEIN_CORS_ORIGINS: ${KLEIN_CORS_ORIGINS:?KLEIN_CORS_ORIGINS is required}
+      KLEIN_OPENAI_BASE: ${KLEIN_OPENAI_BASE:-https://api.openai.com}
+      KLEIN_GROK_BASE: ${KLEIN_GROK_BASE:-https://api.x.ai}
+      KLEIN_PROVIDER_GPT: ${KLEIN_PROVIDER_GPT:-real}
+      KLEIN_PROVIDER_GROK: ${KLEIN_PROVIDER_GROK:-real}
+      KLEIN_GPT_BASE_URL: ${KLEIN_GPT_BASE_URL:-https://api.openai.com}
+      KLEIN_GROK_BASE_URL: ${KLEIN_GROK_BASE_URL:-https://grok.com}
+      KLEIN_SERVER_OPENAI_HOST: 127.0.0.1
+      KLEIN_SERVER_OPENAI_PORT: 17201
+      KLEIN_LOG_DIR: /app/logs
+      TZ: ${TZ:-Asia/Shanghai}
+    ports:
+      - "${KLEIN_USER_WEB_PORT:-17080}:17080"
+      - "${KLEIN_ADMIN_WEB_PORT:-17088}:17088"
+      - "${KLEIN_OPENAI_PORT:-17200}:17200"
+    volumes:
+      - gpt2api-storage:/app/storage
+      - gpt2api-logs:/app/logs
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:17080/healthz | grep -q service || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+volumes:
+  gpt2api-storage:
+  gpt2api-logs:
