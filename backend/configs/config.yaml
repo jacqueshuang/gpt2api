@@ -8,6 +8,7 @@ app:
 server:
   api_port: 17180
   admin_port: 17188
+  openai_host: ""
   openai_port: 17200
   ws_port: 17280
   pprof_port: 17590

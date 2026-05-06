@@ -24,6 +24,7 @@ dist/
 # Local caches / scratch files
 .gocache/
 .tmp/
+.worktrees/
 **/.gocache/
 
 # Local operation artifacts

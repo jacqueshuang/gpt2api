@@ -120,7 +120,31 @@ cp deploy/env/.env.example deploy/env/.env.prod
 #   - 代理 / FlareSolverr 地址
 ```
 
-### 3. 启动服务
+### 3A. 可选：GHCR 单镜像部署
+
+GitHub Actions 会发布 all-in-one 镜像到 GHCR。该镜像内置 user/admin 前端、`api` / `admin` / `openai` / `worker` 后端进程、nginx 和 supervisord；MySQL 与 Redis 仍需外部提供。
+
+```bash
+docker run -d \
+  --name gpt2api \
+  -p 17080:17080 \
+  -p 17088:17088 \
+  -p 17200:17200 \
+  -e KLEIN_ENV=prod \
+  -e KLEIN_DB_DSN='klein:password@tcp(mysql-host:3306)/klein_ai?charset=utf8mb4&parseTime=True&loc=Local' \
+  -e KLEIN_REDIS_ADDR='redis-host:6379' \
+  -e KLEIN_JWT_SECRET='replace-with-at-least-32-bytes-secret' \
+  -e KLEIN_JWT_REFRESH_SECRET='replace-with-at-least-32-bytes-secret' \
+  -e KLEIN_AES_KEY='replace-with-at-least-32-bytes-secret' \
+  -e KLEIN_CORS_ORIGINS='http://localhost:17080,http://localhost:17088' \
+  -v gpt2api-storage:/app/storage \
+  -v gpt2api-logs:/app/logs \
+  ghcr.io/432539/gpt2api:latest
+```
+
+镜像内部 nginx 监听 `17080` / `17088` / `17200`；OpenAI 后端进程只绑定 `127.0.0.1:17201`，由 nginx 对外代理到 `17200`。
+
+### 3B. Compose 源码部署
 
 ```bash
 cd deploy

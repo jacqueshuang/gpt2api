@@ -37,6 +37,7 @@ type App struct {
 type Server struct {
 	APIPort         int           `mapstructure:"api_port"`
 	AdminPort       int           `mapstructure:"admin_port"`
+	OpenAIHost      string        `mapstructure:"openai_host"`
 	OpenAIPort      int           `mapstructure:"openai_port"`
 	WSPort          int           `mapstructure:"ws_port"`
 	PprofPort       int           `mapstructure:"pprof_port"`
